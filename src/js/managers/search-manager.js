@@ -38,6 +38,21 @@ class SearchManager {
     }
 
     /**
+     * 判断是否应该隐藏付费内容
+     * @returns {boolean} true=只显示免费内容,false=显示全部内容
+     */
+    shouldHidePremiumContent() {
+        // 使用 window.paymentManager 获取付费状态
+        const paymentMgr = window.paymentManager;
+        if (!paymentMgr || typeof paymentMgr.isPaidUser !== 'function') {
+            // 如果 paymentManager 不可用，默认为免费用户（隐藏付费内容）
+            return true;
+        }
+        // 付费用户可以看到全部内容,免费用户只看到免费内容
+        return !paymentMgr.isPaidUser();
+    }
+
+    /**
      * 初始化 DOM 元素引用
      */
     initElements() {
@@ -180,7 +195,7 @@ class SearchManager {
             searchText: searchText,
             hskLevel: '',
             wordCount: '',
-            premiumOnly: false
+            hidePremium: this.shouldHidePremiumContent()
         });
 
         // 如果没有结果，提示用户
@@ -485,7 +500,7 @@ class SearchManager {
             searchText: '',
             hskLevel: '',
             wordCount: length,
-            premiumOnly: false
+            hidePremium: this.shouldHidePremiumContent()
         });
 
         if (Array.isArray(results) && results.length > 0) {
@@ -590,7 +605,7 @@ class SearchManager {
                     searchText: '',
                     hskLevel: '',
                     wordCount: '',
-                    premiumOnly: false
+                    hidePremium: this.shouldHidePremiumContent()
                 });
                 
                 if (Array.isArray(allWords) && allWords.length > 0) {
