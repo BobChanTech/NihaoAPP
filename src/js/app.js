@@ -613,7 +613,7 @@ class ChineseVocabApp {
             if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
                 navigator.serviceWorker.controller.postMessage({ type: 'CHECK_UPDATE' });
             } else {
-                const response = await fetch('/data/version.json');
+                const response = await fetch('./src/data/version.json');
                 if (response.ok) {
                     const versionInfo = await response.json();
                     const serverVersion = versionInfo.version || '1.0.4';
