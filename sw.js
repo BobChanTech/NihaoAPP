@@ -1,37 +1,42 @@
 // Service Worker - 强制JavaScript重新获取版本
 // 处理资源缓存和离线功能
 
-const CACHE_NAME = 'chinese-vocab-v1.0.16';
+// 获取部署路径前缀（如 /NihaoAPP/ 或 /）
+const SCOPE_PATH = self.location.pathname.replace(/\/[^/]*$/, '') || '';
+const CACHE_NAME = 'chinese-vocab-v1.0.17';
+
+// 缓存列表（使用相对路径，自动适配部署路径）
 const urlsToCache = [
-    '/',
-    '/index.html',
-    '/src/css/style.css',
-    '/src/data/manifest.json',
-    '/src/data/languages.json',
+    './',
+    './index.html',
+    './src/css/style.css',
+    './src/data/manifest.json',
+    './src/data/languages.json',
     // JavaScript files
-    '/src/js/app.js',
-    '/src/js/font-loader.js',
-    '/src/js/idb.js',
-    '/src/js/language.js',
-    '/src/js/payment.js',
-    '/src/js/sw-register.js',
-    '/src/js/theme.js',
-    '/src/js/vocab-db.js',
+    './src/js/app.js',
+    './src/js/font-loader.js',
+    './src/js/idb.js',
+    './src/js/language.js',
+    './src/js/payment.js',
+    './src/js/sw-register.js',
+    './src/js/theme.js',
+    './src/js/vocab-db.js',
     // Manager files
-    '/src/js/managers/favorites-manager.js',
-    '/src/js/managers/search-manager.js',
-    '/src/js/managers/share-manager.js',
-    '/src/js/managers/speech-manager.js',
-    '/src/js/managers/stroke-manager.js'
+    './src/js/managers/favorites-manager.js',
+    './src/js/managers/search-manager.js',
+    './src/js/managers/share-manager.js',
+    './src/js/managers/speech-manager.js',
+    './src/js/managers/stroke-manager.js'
 ];
 
 // 安装事件
 self.addEventListener('install', event => {
-    console.log('Service Worker: 开始安装');
+    console.log('Service Worker: 开始安装，路径前缀:', SCOPE_PATH);
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then(cache => {
                 console.log('Service Worker: 开始缓存资源');
+                // 使用相对路径，Service Worker 会自动添加 scope 路径
                 return cache.addAll(urlsToCache);
             })
             .then(() => {
@@ -40,6 +45,8 @@ self.addEventListener('install', event => {
             })
             .catch(error => {
                 console.error('Service Worker: 缓存失败:', error);
+                // 即使缓存失败也继续安装
+                return self.skipWaiting();
             })
     );
 });
