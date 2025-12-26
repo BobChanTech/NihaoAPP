@@ -125,9 +125,14 @@ class ChineseVocabApp {
         }
     }
 
-    showStrokeOrder() {
-        // Ensure we have a valid current word before showing stroke order
-        const currentWord = this.currentWords && this.currentWords[this.currentIndex];
+    showStrokeOrder(word = null) {
+        // 支持传入 word 参数（用于搜索结果预览模式）
+        let currentWord = word;
+        
+        // 如果没有传入 word，则从当前浏览位置获取
+        if (!currentWord) {
+            currentWord = this.currentWords && this.currentWords[this.currentIndex];
+        }
         
         // 添加调试日志以便通过F12控制台追踪问题
         console.log('Stroke Order Debug - Current Word:', currentWord);
@@ -1614,3 +1619,5 @@ document.addEventListener('DOMContentLoaded', () => {
         window.addEventListener('languageSelected', onLangSelected);
     }
 });
+
+ 
