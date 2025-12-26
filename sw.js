@@ -74,6 +74,11 @@ self.addEventListener('fetch', event => {
         return;
     }
     
+    // 对于跨域请求，直接转发不做处理
+    if (url.origin !== location.origin) {
+        return;
+    }
+    
     // 强制重新获取JavaScript文件（跳过缓存）
     if (url.pathname.endsWith('.js') && url.pathname.includes('/src/js/')) {
         console.log('Service Worker: 跳过缓存，重新获取:', url.pathname);
@@ -132,11 +137,8 @@ self.addEventListener('fetch', event => {
                     })
                     .catch(error => {
                         console.error('Service Worker: 网络获取失败:', error);
-                        // 可以返回离线页面或其他处理
-                        return new Response('离线状态，请检查网络连接', {
-                            status: 503,
-                            statusText: 'Service Unavailable'
-                        });
+                        // 如果网络失败，尝试返回缓存的版本
+                        return caches.match(event.request);
                     });
             })
     );
