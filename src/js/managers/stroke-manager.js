@@ -107,13 +107,28 @@ class StrokeManager {
     /**
      * 显示汉字笔顺功能
      * 支持单字和多字词条
+     * 支持搜索结果预览模式（优先从DOM获取当前显示的汉字）
      */
     async showStrokeOrder(word = null) {
         try {
-            // 使用传入的word参数或从app获取当前单词
-            const currentWord = word || (this.app.currentWords && this.app.currentWords.length > 0 && this.app.currentWords[this.app.currentIndex]);
+            let currentWord = word;
             
+            // 优先从DOM获取当前显示的内容（支持搜索结果预览模式）
+            const chineseEl = document.getElementById('chinese');
+            if (chineseEl && chineseEl.textContent) {
+                console.log('Stroke Order - Using text from DOM:', chineseEl.textContent);
+                // 创建一个临时的word对象用于笔画显示
+                currentWord = {
+                    chinese_cn: chineseEl.textContent.trim()
+                };
+            }
+            
+            // 如果DOM中没有内容，且没有传入word，则从app获取
             if (!currentWord) {
+                currentWord = this.app.currentWords && this.app.currentWords[this.app.currentIndex];
+            }
+            
+            if (!currentWord || !currentWord.chinese_cn) {
                 const errorMsg = this.getErrorMessage('errorNoData');
                 if (this.app.showToast) {
                     this.app.showToast(errorMsg, 'error');
