@@ -91,10 +91,10 @@ class VocabDB {
     }
 
     async searchWords(options) {
-        const { searchText, hskLevel, wordCount, premiumOnly } = options;
+        const { searchText, hskLevel, wordCount, hidePremium } = options;
         
         if (!searchText || searchText.trim() === '') {
-            return this.searchWithoutText({ hskLevel, wordCount, premiumOnly });
+            return this.searchWithoutText({ hskLevel, wordCount, hidePremium });
         }
         
         return new Promise((resolve, reject) => {
@@ -131,7 +131,7 @@ class VocabDB {
                     for (const word of allWords) {
                         if (hskLevel && hskLevel !== 'all' && word.hsk_level != hskLevel) continue;
                         if (wordCount && wordCount !== 'all' && word.word_count != wordCount) continue;
-                        if (premiumOnly && !word.is_premium) continue;
+                        if (hidePremium && word.is_premium) continue;
 
                         let match = false;
                         
@@ -268,7 +268,7 @@ class VocabDB {
     }
 
     async searchWithoutText(options) {
-        const { hskLevel, wordCount, premiumOnly } = options;
+        const { hskLevel, wordCount, hidePremium } = options;
         return new Promise((resolve, reject) => {
             try {
                 const tx = this.db.transaction(['words'], 'readonly');
@@ -282,7 +282,7 @@ class VocabDB {
                     for (const word of allWords) {
                         if (hskLevel && hskLevel !== 'all' && word.hsk_level != hskLevel) continue;
                         if (wordCount && wordCount !== 'all' && word.word_count != wordCount) continue;
-                        if (premiumOnly && !word.is_premium) continue;
+                        if (hidePremium && word.is_premium) continue;
                         
                         results.push(word);
                     }
