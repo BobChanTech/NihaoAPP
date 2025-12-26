@@ -1,0 +1,371 @@
+{
+  "supportedLanguages": [
+    {
+      "code": "vi",
+      "name": "Tiếng Việt",
+      "englishName": "Vietnamese",
+      "nativeName": "Tiếng Việt",
+      "icon": "🇻🇳",
+      "country": "Vietnam",
+      "countryCode": "VN",
+      "isDefault": true,
+      "direction": "ltr",
+      "locale": "vi-VN",
+      "fontFamily": "'Noto Sans', 'Inter', sans-serif",
+      "search": "Tìm kiếm",
+      "strokeSingleCharOnly": "Chức năng này chỉ hỗ trợ một ký tự Trung Quốc"
+    },
+    {
+      "code": "en",
+      "name": "English",
+      "englishName": "English",
+      "nativeName": "English",
+      "icon": "🇺🇸",
+      "country": "United States",
+      "countryCode": "US",
+      "isDefault": false,
+      "direction": "ltr",
+      "locale": "en-US",
+      "fontFamily": "'Inter', 'Noto Sans', sans-serif",
+      "search": "Search",
+      "strokeSingleCharOnly": "This function only supports single Chinese characters"
+    },
+    {
+      "code": "id",
+      "name": "Bahasa",
+      "englishName": "Indonesian",
+      "nativeName": "Bahasa Indonesia",
+      "icon": "🇮🇩",
+      "country": "Indonesia",
+      "countryCode": "ID",
+      "isDefault": false,
+      "direction": "ltr",
+      "locale": "id-ID",
+      "fontFamily": "'Noto Sans', 'Inter', sans-serif",
+      "search": "Cari",
+      "strokeSingleCharOnly": "Fitur ini hanya mendukung satu karakter Cina"
+    },
+    {
+      "code": "es",
+      "name": "Español",
+      "englishName": "Spanish",
+      "nativeName": "Español",
+      "icon": "🇪🇸",
+      "country": "Spain",
+      "countryCode": "ES",
+      "isDefault": false,
+      "direction": "ltr",
+      "locale": "es-ES",
+      "fontFamily": "'Noto Sans', 'Inter', sans-serif",
+      "search": "Buscar",
+      "strokeSingleCharOnly": "Esta función solo admite un carácter chino"
+    },
+    {
+      "code": "de",
+      "name": "Deutsch",
+      "englishName": "German",
+      "nativeName": "Deutsch",
+      "icon": "🇩🇪",
+      "country": "Germany",
+      "countryCode": "DE",
+      "isDefault": false,
+      "direction": "ltr",
+      "locale": "de-DE",
+      "fontFamily": "'Noto Sans', 'Inter', sans-serif",
+      "search": "Suchen",
+      "strokeSingleCharOnly": "Diese Funktion unterstützt nur ein chinesisches Zeichen"
+    },
+    {
+      "code": "fr",
+      "name": "Français",
+      "englishName": "French",
+      "nativeName": "Français",
+      "icon": "🇫🇷",
+      "country": "France",
+      "countryCode": "FR",
+      "isDefault": false,
+      "direction": "ltr",
+      "locale": "fr-FR",
+      "fontFamily": "'Noto Sans', 'Inter', sans-serif",
+      "search": "Rechercher",
+      "strokeSingleCharOnly": "Cette fonction ne prend en charge qu'un seul caractère chinois"
+    },
+    {
+      "code": "ru",
+      "name": "Русский",
+      "englishName": "Russian",
+      "nativeName": "Русский",
+      "icon": "🇷🇺",
+      "country": "Russia",
+      "countryCode": "RU",
+      "isDefault": false,
+      "direction": "ltr",
+      "locale": "ru-RU",
+      "fontFamily": "'Noto Sans', 'Inter', sans-serif",
+      "search": "Поиск",
+      "strokeSingleCharOnly": "Эта функция поддерживает только один китайский символ"
+    },
+    {
+      "code": "ko",
+      "name": "한국어",
+      "englishName": "Korean",
+      "nativeName": "한국어",
+      "icon": "🇰🇷",
+      "country": "South Korea",
+      "countryCode": "KR",
+      "isDefault": false,
+      "direction": "ltr",
+      "locale": "ko-KR",
+      "fontFamily": "'Noto Sans', 'Inter', sans-serif",
+      "search": "검색",
+      "strokeSingleCharOnly": "이 기능은 한 개의 중국어 문자만 지원합니다"
+    },
+    {
+      "code": "hi",
+      "name": "हिन्दी",
+      "englishName": "Hindi",
+      "nativeName": "हिन्दी",
+      "icon": "🇮🇳",
+      "country": "India",
+      "countryCode": "IN",
+      "isDefault": false,
+      "direction": "ltr",
+      "locale": "hi-IN",
+      "fontFamily": "'Noto Sans Devanagari', 'Noto Sans', sans-serif",
+      "search": "खोज",
+      "strokeSingleCharOnly": "यह कार्यक्षमता केवल एक चीनी वर्ण का समर्थन करती है"
+    },
+    {
+      "code": "th",
+      "name": "ภาษาไทย",
+      "englishName": "Thai",
+      "nativeName": "ภาษาไทย",
+      "icon": "🇹🇭",
+      "country": "Thailand",
+      "countryCode": "TH",
+      "isDefault": false,
+      "direction": "ltr",
+      "locale": "th-TH",
+      "fontFamily": "'Noto Sans Thai', 'Noto Sans', sans-serif",
+      "search": "ค้นหา",
+      "strokeSingleCharOnly": "ฟังก์ชันนี้รองรับเฉพาะตัวอักษรจีนเพียงตัวเดียว"
+    },
+    {
+      "code": "my",
+      "name": "Bahasa",
+      "englishName": "Malay",
+      "nativeName": "بهاس ملايو",
+      "icon": "🇲🇾",
+      "country": "Malaysia",
+      "countryCode": "MY",
+      "isDefault": false,
+      "direction": "ltr",
+      "locale": "ms-MY",
+      "fontFamily": "'Noto Sans', 'Inter', sans-serif",
+      "search": "Cari",
+      "strokeSingleCharOnly": "Fungsi ini hanya menyokong satu aksara Cina"
+    },
+    {
+      "code": "km",
+      "name": "ភាសាខ្មែរ",
+      "englishName": "Khmer",
+      "nativeName": "ភាសាខ្មែរ",
+      "icon": "🇰🇭",
+      "country": "Cambodia",
+      "countryCode": "KH",
+      "isDefault": false,
+      "direction": "ltr",
+      "locale": "km-KH",
+      "fontFamily": "'Noto Sans Khmer', 'Noto Sans', sans-serif",
+      "search": "ស្វែងរក",
+      "strokeSingleCharOnly": "មុខងារនេះគ្រាន់តែគាំទ្រតែតួអក្សរចិនតែមួយ"
+    },
+    {
+      "code": "lo",
+      "name": "ພາສາລາວ",
+      "englishName": "Lao",
+      "nativeName": "ພາສາລາວ",
+      "icon": "🇱🇦",
+      "country": "Laos",
+      "countryCode": "LA",
+      "isDefault": false,
+      "direction": "ltr",
+      "locale": "lo-LA",
+      "fontFamily": "'Noto Sans Lao', 'Noto Sans', sans-serif",
+      "search": "ຄົ້ນຫາ",
+      "strokeSingleCharOnly": "ຟັງກຊັ່ນນີ້ສະໜັບສະໜູນພຽງແຕ່ຕົວອັກສອນຈີນພຽງຕົວດຽວ"
+    },
+    {
+      "code": "mya",
+      "name": "မြန်မာစာ",
+      "englishName": "Burmese",
+      "nativeName": "မြန်မာစာ",
+      "icon": "🇲🇲",
+      "country": "Myanmar",
+      "countryCode": "MM",
+      "isDefault": false,
+      "direction": "ltr",
+      "locale": "my-MM",
+      "fontFamily": "'Noto Sans Myanmar', 'Noto Sans', sans-serif",
+      "search": "ရှာဖွေခြင်း",
+      "strokeSingleCharOnly": "ဤလုပ်ဆောင်ချက်သည် တရုတ်စာလုံးတစ်လုံးတည်းကိုသာ ပံ့ပိုးသည်"
+    },
+    {
+      "code": "bn",
+      "name": "বাংলা",
+      "englishName": "Bengali",
+      "nativeName": "বাংলা",
+      "icon": "🇧🇩",
+      "country": "Bangladesh",
+      "countryCode": "BD",
+      "isDefault": false,
+      "direction": "ltr",
+      "locale": "bn-BD",
+      "fontFamily": "'Noto Sans Bengali', 'Noto Sans', sans-serif",
+      "search": "অনুসন্ধান",
+      "strokeSingleCharOnly": "এই ফাংশনটি শুধুমাত্র একটি চীনা অক্ষর সমর্থন করে"
+    },
+    {
+      "code": "ja",
+      "name": "日本語",
+      "englishName": "Japanese",
+      "nativeName": "日本語",
+      "icon": "🇯🇵",
+      "country": "Japan",
+      "countryCode": "JP",
+      "isDefault": false,
+      "direction": "ltr",
+      "locale": "ja-JP",
+      "fontFamily": "'Noto Sans JP', 'Noto Sans', sans-serif",
+      "search": "検索",
+      "strokeSingleCharOnly": "この機能は1つの漢字のみをサポートしています"
+    }
+  ],
+
+  "languageGroups": {
+    "southeastAsia": ["vi", "id", "th", "my", "km", "lo", "mya"],
+    "southAsia": ["hi", "bn"],
+    "international": ["es", "de", "fr", "ru", "ko", "ja"]
+  },
+
+  "fallbackLanguage": "vi",
+  "defaultRegion": "Southeast Asia",
+
+  "languageInfo": {
+    "vi": {
+      "script": "Latin",
+      "speakers": "90 million",
+      "notes": "Official language of Vietnam. Uses Latin alphabet with diacritics.",
+      "googleFont": "Noto Sans"
+    },
+    "id": {
+      "script": "Latin",
+      "speakers": "270 million",
+      "notes": "Official language of Indonesia. Based on Malay language.",
+      "googleFont": "Noto Sans"
+    },
+    "th": {
+      "script": "Thai",
+      "speakers": "60 million",
+      "notes": "Official language of Thailand. Uses Thai script.",
+      "googleFont": "Noto Sans Thai"
+    },
+    "km": {
+      "script": "Khmer",
+      "speakers": "16 million",
+      "notes": "Official language of Cambodia. Uses Khmer script.",
+      "googleFont": "Noto Sans Khmer"
+    },
+    "lo": {
+      "script": "Lao",
+      "speakers": "30 million",
+      "notes": "Official language of Laos. Uses Lao script.",
+      "googleFont": "Noto Sans Lao"
+    },
+    "mya": {
+      "script": "Burmese",
+      "speakers": "33 million",
+      "notes": "Official language of Myanmar. Uses Burmese script.",
+      "googleFont": "Noto Sans Myanmar"
+    },
+    "hi": {
+      "script": "Devanagari",
+      "speakers": "600 million",
+      "notes": "Official language of India. Widely spoken in Northern India.",
+      "googleFont": "Noto Sans Devanagari"
+    },
+    "ta": {
+      "script": "Tamil",
+      "speakers": "75 million",
+      "notes": "Official language of Tamil Nadu, India and Sri Lanka.",
+      "googleFont": "Noto Sans Tamil"
+    },
+    "bn": {
+      "script": "Bengali",
+      "speakers": "230 million",
+      "notes": "Official language of Bangladesh and Indian state of West Bengal.",
+      "googleFont": "Noto Sans Bengali"
+    },
+    "si": {
+      "script": "Sinhala",
+      "speakers": "17 million",
+      "notes": "Official language of Sri Lanka.",
+      "googleFont": "Noto Sans Sinhala"
+    },
+    "en": {
+      "script": "Latin",
+      "speakers": "1.5 billion",
+      "notes": "International fallback language.",
+      "googleFont": "Inter"
+    }
+    ,
+    "es": {
+      "script": "Latin",
+      "speakers": "460 million",
+      "notes": "Spanish — widely spoken in Spain and Latin America.",
+      "googleFont": "Noto Sans"
+    },
+    "de": {
+      "script": "Latin",
+      "speakers": "130 million",
+      "notes": "German — official language of Germany, Austria, and Switzerland.",
+      "googleFont": "Noto Sans"
+    },
+    "fr": {
+      "script": "Latin",
+      "speakers": "320 million",
+      "notes": "French — official language of France and many countries in Africa and Canada.",
+      "googleFont": "Noto Sans"
+    },
+    "ru": {
+      "script": "Cyrillic",
+      "speakers": "258 million",
+      "notes": "Russian — official language of Russia and other countries in Eastern Europe and Asia.",
+      "googleFont": "Noto Sans Cyrillic"
+    },
+    "ko": {
+      "script": "Hangul",
+      "speakers": "75 million",
+      "notes": "Korean — official language of South Korea and North Korea.",
+      "googleFont": "Noto Sans KR"
+    },
+    "ja": {
+      "script": "Japanese",
+      "speakers": "128 million",
+      "notes": "Japanese — official language of Japan.",
+      "googleFont": "Noto Sans JP"
+    }
+  },
+
+  "fontConfig": {
+    "default": "'Noto Sans', 'Inter', sans-serif",
+    "thai": "'Noto Sans Thai', 'Noto Sans', sans-serif",
+    "khmer": "'Noto Sans Khmer', 'Noto Sans', sans-serif",
+    "lao": "'Noto Sans Lao', 'Noto Sans', sans-serif",
+    "myanmar": "'Noto Sans Myanmar', 'Noto Sans', sans-serif",
+    "devanagari": "'Noto Sans Devanagari', 'Noto Sans', sans-serif",
+    "tamil": "'Noto Sans Tamil', 'Noto Sans', sans-serif",
+    "bengali": "'Noto Sans Bengali', 'Noto Sans', sans-serif",
+    "sinhala": "'Noto Sans Sinhala', 'Noto Sans', sans-serif"
+  }
+}
