@@ -4,7 +4,7 @@ if ('serviceWorker' in navigator) {
 console.log('页面: 开始注册Service Worker');
 
 window.addEventListener('load', () => {
-navigator.serviceWorker.register('/sw.js')
+navigator.serviceWorker.register('sw.js')
 .then(registration => {
 console.log('Service Worker 注册成功:', registration.scope);
 
@@ -409,4 +409,5 @@ window.addEventListener('beforeunload', () => {
 if (navigator.serviceWorker.controller) {
 navigator.serviceWorker.controller.postMessage({ type: 'RESET_UPDATE_FLAG' });
 }
+
 });
