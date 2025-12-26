@@ -657,7 +657,7 @@ class ChineseVocabApp {
             searchText: '',
             hskLevel: '',
             wordCount: '',
-            premiumOnly: false
+            hidePremium: false
         });
         
         if (Array.isArray(allWords) && allWords.length > 0) {
@@ -1614,5 +1614,3 @@ document.addEventListener('DOMContentLoaded', () => {
         window.addEventListener('languageSelected', onLangSelected);
     }
 });
-
- 
