@@ -20,7 +20,7 @@ class DataManager {
         this._updateDataStatus('正在下载数据...', 'loading');
         try {
             const timestamp = Date.now();
-            const response = await fetch(`src/data/databasemain.json?_=${timestamp}`, {
+            const response = await fetch(`./src/data/databasemain.json?_=${timestamp}`, {
                 cache: 'no-cache',
                 headers: {
                     'Cache-Control': 'no-cache, no-store, must-revalidate',
