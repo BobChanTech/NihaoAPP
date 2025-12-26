@@ -12,7 +12,7 @@ class FontLoader {
         }
 
         try {
-            const response = await fetch('/src/data/languages.json');
+            const response = await fetch('./src/data/languages.json');
             this.languagesData = await response.json();
             
             // 从languageInfo中构建字体映射
