@@ -498,8 +498,8 @@ class StrokeManager {
                     const targetCharacter = charParam || targetChar;
                     console.log(`[StrokeManager] 加载字符数据: ${targetCharacter}`);
                     
-                    // 首先尝试从本地加载
-                    const localUrl = `/char-data/${targetCharacter}.json`;
+                    // 首先尝试从本地加载（使用相对路径）
+                    const localUrl = `./char-data/${targetCharacter}.json`;
                     const fullLocalUrl = window.location.origin + localUrl;
                     console.log(`尝试从本地加载汉字数据: ${fullLocalUrl}`);
                     
