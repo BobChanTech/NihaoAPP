@@ -32,7 +32,7 @@ class LanguageManager {
 
     async loadLanguages() {
         try {
-            const response = await fetch('/src/data/languages.json');
+            const response = await fetch('src/data/languages.json');
             const data = await response.json();
             this.supportedLanguages = data.supportedLanguages.filter(lang => lang.code !== 'en');
         } catch (error) {
