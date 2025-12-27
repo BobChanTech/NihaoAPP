@@ -912,12 +912,20 @@ class ChineseVocabApp {
                 iosModal.style.display = 'none';
             });
 
-            document.getElementById('copy-ios-export').addEventListener('click', () => {
+            document.getElementById('copy-ios-export').addEventListener('click', async () => {
                 const textarea = document.getElementById('ios-export-json');
-                textarea.select();
-                document.execCommand('copy');
-                document.getElementById('copy-success-msg').style.display = 'block';
-                this.showToast('已复制到剪贴板', 'success');
+                try {
+                    await navigator.clipboard.writeText(textarea.value);
+                    document.getElementById('copy-success-msg').style.display = 'block';
+                    this.showToast('已复制到剪贴板', 'success');
+                } catch (error) {
+                    console.error('复制失败:', error);
+                    // 降级方案
+                    textarea.select();
+                    document.execCommand('copy');
+                    document.getElementById('copy-success-msg').style.display = 'block';
+                    this.showToast('已复制到剪贴板', 'success');
+                }
             });
 
             // 点击外部关闭
