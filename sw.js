@@ -52,7 +52,6 @@
         versionData: null,
         lastCheckTime: 0,
         isFirstVisit: true,
-        hasUpdate: false,
 
         /**
          * 获取版本数据
@@ -87,19 +86,12 @@
                 if (response.ok) {
                     const newData = await response.json();
                     
-                    // 检测版本变化
-                    if (this.versionData && this.versionData.version !== newData.version) {
-                        this.hasUpdate = true;
-                        console.log('[VersionManager] 检测到版本变化:', 
-                            this.versionData.version, '->', newData.version);
-                    }
-                    
                     this.versionData = newData;
                     this.lastCheckTime = Date.now();
                     return this.versionData;
                 }
             } catch (error) {
-                console.warn('[VersionManager] 获取版本数据失败:', error.message);
+                // 静默失败
             }
             
             return this.versionData;
@@ -188,14 +180,7 @@
                     });
                     
                     if (response.ok) {
-                        // 检查是否是版本更新后的首次请求
-                        if (VersionManager.hasUpdate) {
-                            // 版本有更新，强制更新所有缓存
-                            VersionManager.hasUpdate = false;
-                            console.log('[Strategy:SWR] 版本已更新，更新缓存');
-                        }
-                        
-                        // 克隆响应并缓存
+                        // 静默更新缓存
                         cache.put(request, response.clone());
                     }
                 } catch (error) {
@@ -447,19 +432,8 @@
             self.skipWaiting();
         }
         else if (data?.type === 'CHECK_UPDATE') {
-            VersionManager.fetchVersionData().then(versionData => {
-                if (versionData) {
-                    self.clients.matchAll().then(clients => {
-                        clients.forEach(client => {
-                            client.postMessage({
-                                type: 'UPDATE_AVAILABLE',
-                                version: versionData.version,
-                                cacheVersion: versionData.mappings?.cache_version
-                            });
-                        });
-                    });
-                }
-            });
+            // 静默检查更新，不通知客户端
+            VersionManager.fetchVersionData().catch(() => {});
         }
         else if (data?.type === 'GET_VERSION') {
             const clients = event.ports;
