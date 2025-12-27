@@ -34,14 +34,12 @@ class LanguageManager {
         try {
             const response = await fetch('./src/data/languages.json');
             const data = await response.json();
-            // 包含所有语言，但隐藏高棉语(km)的UI选项，保留后端数据
-            this.supportedLanguages = data.supportedLanguages.filter(lang => lang.code !== 'km');
+            this.supportedLanguages = data.supportedLanguages.filter(lang => lang.code !== 'en');
         } catch (error) {
             console.error('加载语言配置失败:', error);
-            // 默认语言（包含英语，排除高棉语）
+            // 默认语言（不包含英语）
             this.supportedLanguages = [
-                { code: 'vi', name: 'Tiếng Việt', englishName: 'Vietnamese', icon: '🇻🇳' },
-                { code: 'en', name: 'English', englishName: 'English', icon: '🇺🇸' }
+                { code: 'vi', name: 'Tiếng Việt', englishName: 'Vietnamese', icon: '🇻🇳' }
             ];
         }
     }
