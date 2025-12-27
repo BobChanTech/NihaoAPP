@@ -1,9 +1,14 @@
-// Service Worker - 强制JavaScript重新获取版本
+// Service Worker - 纯Cache-First缓存策略版本
 // 处理资源缓存和离线功能
+// 缓存策略：优先使用缓存，缓存不存在时才从网络获取
+// 这种策略可以最大化离线可用性和加载速度
 
 // 获取部署路径前缀（如 /NihaoAPP/ 或 /）
 const SCOPE_PATH = self.location.pathname.replace(/\/[^/]*$/, '') || '';
-const CACHE_NAME = 'chinese-vocab-v1.0.17';
+
+// 统一版本号：应用版本与缓存版本保持一致
+const APP_VERSION = '1.0.4';
+const CACHE_NAME = `chinese-vocab-${APP_VERSION}`;
 
 // 缓存列表（使用相对路径，自动适配部署路径）
 const urlsToCache = [
@@ -31,50 +36,48 @@ const urlsToCache = [
 
 // 安装事件
 self.addEventListener('install', event => {
-    console.log('Service Worker: 开始安装，路径前缀:', SCOPE_PATH);
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then(cache => {
-                console.log('Service Worker: 开始缓存资源');
-                // 使用相对路径，Service Worker 会自动添加 scope 路径
+                console.log('打开缓存:', CACHE_NAME);
+                // 添加所有资源到缓存
                 return cache.addAll(urlsToCache);
             })
             .then(() => {
-                console.log('Service Worker: 缓存完成，跳过等待');
+                // 安装完成后立即激活，不等待页面关闭
                 return self.skipWaiting();
             })
             .catch(error => {
-                console.error('Service Worker: 缓存失败:', error);
-                // 即使缓存失败也继续安装
+                console.error('缓存安装失败:', error);
+                // 即使部分资源缓存失败也继续
                 return self.skipWaiting();
             })
     );
 });
 
-// 激活事件
+// 激活事件：清理旧版本缓存
 self.addEventListener('activate', event => {
-    console.log('Service Worker: 开始激活');
     event.waitUntil(
         caches.keys().then(cacheNames => {
             return Promise.all(
                 cacheNames.map(cacheName => {
-                    if (cacheName !== CACHE_NAME) {
-                        console.log('Service Worker: 删除旧缓存:', cacheName);
+                    // 删除不属于当前版本的缓存
+                    if (cacheName !== CACHE_NAME && cacheName.startsWith('chinese-vocab-')) {
+                        console.log('删除旧缓存:', cacheName);
                         return caches.delete(cacheName);
                     }
                 })
             );
         }).then(() => {
-            console.log('Service Worker: 激活完成');
+            // 立即控制所有页面
             return self.clients.claim();
         })
     );
 });
 
-// 拦截网络请求
+// 拦截网络请求 - 纯Cache-First策略
 self.addEventListener('fetch', event => {
     const url = new URL(event.request.url);
-    console.log('Service Worker: 拦截请求:', event.request.method, url.pathname);
     
     // 只处理GET请求
     if (event.request.method !== 'GET') {
@@ -86,77 +89,134 @@ self.addEventListener('fetch', event => {
         return;
     }
     
-    // 强制重新获取JavaScript文件（跳过缓存）
-    if (url.pathname.endsWith('.js') && url.pathname.includes('/src/js/')) {
-        console.log('Service Worker: 跳过缓存，重新获取:', url.pathname);
-        event.respondWith(
-            fetch(event.request)
-                .then(response => {
-                    if (response && response.status === 200) {
-                        // 缓存新的JavaScript文件
-                        const responseToCache = response.clone();
-                        caches.open(CACHE_NAME)
-                            .then(cache => {
-                                cache.put(event.request, responseToCache);
-                            });
-                        return response;
-                    }
-                    return response;
-                })
-                .catch(error => {
-                    console.error('Service Worker: 网络获取失败:', error);
-                    // 如果网络失败，返回缓存的版本
-                    return caches.match(event.request);
-                })
-        );
-        return;
-    }
-    
-    // 对于非JavaScript文件，使用缓存优先策略
-    event.respondWith(
-        caches.match(event.request)
-            .then(response => {
-                // 如果缓存中有响应，直接返回
-                if (response) {
-                    console.log('Service Worker: 缓存命中:', url.pathname);
-                    return response;
-                }
-                
-                // 否则从网络获取
-                console.log('Service Worker: 网络获取:', url.pathname);
-                return fetch(event.request)
-                    .then(response => {
-                        // 检查响应是否有效
-                        if (!response || response.status !== 200 || response.type !== 'basic') {
-                            return response;
-                        }
-                        
-                        // 克隆响应（重要！）
-                        const responseToCache = response.clone();
-                        
-                        caches.open(CACHE_NAME)
-                            .then(cache => {
-                                console.log('Service Worker: 缓存新资源:', url.pathname);
-                                cache.put(event.request, responseToCache);
-                            });
-                        
-                        return response;
-                    })
-                    .catch(error => {
-                        console.error('Service Worker: 网络获取失败:', error);
-                        // 如果网络失败，尝试返回缓存的版本
-                        return caches.match(event.request);
-                    });
-            })
-    );
+    // 使用纯Cache-First策略
+    event.respondWith(cacheFirstStrategy(event.request));
 });
+
+/**
+ * 纯Cache-First策略
+ * 1. 优先检查缓存是否存在
+ * 2. 如果缓存存在，直接返回缓存
+ * 3. 如果缓存不存在，从网络获取
+ * 4. 将网络响应缓存起来（如果成功）
+ * 5. 如果网络也失败，返回离线兜底响应
+ */
+async function cacheFirstStrategy(request) {
+    try {
+        // 1. 首先检查缓存
+        const cachedResponse = await caches.match(request);
+        
+        if (cachedResponse) {
+            console.log('缓存命中:', request.url);
+            return cachedResponse;
+        }
+        
+        console.log('缓存未命中，从网络获取:', request.url);
+        
+        // 2. 缓存不存在，从网络获取
+        const networkResponse = await fetch(request);
+        
+        // 3. 只有成功响应才缓存
+        if (networkResponse && networkResponse.status === 200) {
+            const responseToCache = networkResponse.clone();
+            const cache = await caches.open(CACHE_NAME);
+            cache.put(request, responseToCache);
+            console.log('已缓存:', request.url);
+        }
+        
+        return networkResponse;
+        
+    } catch (error) {
+        console.error('获取失败:', request.url, error);
+        
+        // 4. 网络失败，返回离线兜底
+        return new Response('离线 - 请检查网络连接', { 
+            status: 503,
+            statusText: 'Service Unavailable',
+            headers: new Headers({
+                'Content-Type': 'text/plain; charset=utf-8'
+            })
+        });
+    }
+}
 
 // 消息事件（用于强制更新）
 self.addEventListener('message', event => {
-    console.log('Service Worker: 收到消息:', event.data);
-    
-    if (event.data && event.data.type === 'SKIP_WAITING') {
-        console.log('Service Worker: 强制更新');
-        self.skipWaiting();
+    if (event.data) {
+        switch (event.data.type) {
+            case 'SKIP_WAITING':
+                // 立即激活等待中的Service Worker
+                self.skipWaiting();
+                break;
+            case 'CHECK_UPDATE':
+                // 收到版本检查请求，检查是否有更新
+                checkForUpdates();
+                break;
+            case 'CLEAR_DATABASE_CACHE':
+                // 清除数据库缓存
+                clearDatabaseCache();
+                break;
+            case 'RESET_UPDATE_FLAG':
+                // 重置更新标志
+                resetUpdateFlag();
+                break;
+        }
     }
 });
+
+/**
+ * 检查版本更新
+ */
+async function checkForUpdates() {
+    try {
+        const response = await fetch('./src/data/version.json');
+        if (response.ok) {
+            const versionInfo = await response.json();
+            const serverVersion = versionInfo.version || '1.0.4';
+            
+            // 比较版本
+            const currentVersion = APP_VERSION;
+            if (serverVersion !== currentVersion) {
+                console.log('发现新版本:', serverVersion);
+                
+                // 通知客户端有新版本
+                const clients = await self.clients.matchAll();
+                clients.forEach(client => {
+                    client.postMessage({
+                        type: 'UPDATE_AVAILABLE',
+                        newVersion: serverVersion,
+                        updateInfo: versionInfo
+                    });
+                });
+            }
+        }
+    } catch (error) {
+        console.error('检查更新失败:', error);
+    }
+}
+
+/**
+ * 清除数据库缓存
+ */
+async function clearDatabaseCache() {
+    try {
+        // 清除所有以 chinese-vocab- 开头的缓存
+        const cacheNames = await caches.keys();
+        await Promise.all(
+            cacheNames
+                .filter(name => name.startsWith('chinese-vocab-'))
+                .map(name => caches.delete(name))
+        );
+        console.log('数据库缓存已清除');
+    } catch (error) {
+        console.error('清除缓存失败:', error);
+    }
+}
+
+/**
+ * 重置更新标志
+ */
+function resetUpdateFlag() {
+    // 预留用于重置任何更新相关的状态
+    console.log('更新标志已重置');
+}
