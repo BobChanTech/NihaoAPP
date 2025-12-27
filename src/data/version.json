@@ -1,5 +1,53 @@
 {
-  "version": "1.0.4",
-  "last_updated": "2025-12-20",
-  "description": "中文词汇数据版本信息"
+  "version": "1.0.19",
+  "data_version": "1.0.5",
+  "released": "2025-12-27",
+  "changelog": "Optimize caching strategy: always prefer cache when online",
+  "mappings": {
+    "cache_version": "chinese-vocab-v1.0.19",
+    "data_version": "1.0.5"
+  },
+  "assets": {
+    "core": {
+      "updateStrategy": "stale-while-revalidate",
+      "files": [
+        "/index.html",
+        "/src/css/style.css",
+        "/src/js/app.js",
+        "/src/js/language.js"
+      ]
+    },
+    "business": {
+      "updateStrategy": "stale-while-revalidate",
+      "files": [
+        "/src/js/vocab-db.js",
+        "/src/js/theme.js",
+        "/src/js/font-loader.js",
+        "/src/js/payment.js",
+        "/src/js/sw-register.js",
+        "/src/js/managers/search-manager.js",
+        "/src/js/managers/display-manager.js",
+        "/src/js/managers/speech-manager.js",
+        "/src/js/managers/stroke-manager.js",
+        "/src/js/managers/favorites-manager.js",
+        "/src/js/managers/share-manager.js",
+        "/src/js/managers/data-manager.js"
+      ]
+    },
+    "data": {
+      "updateStrategy": "cache-first-network",
+      "files": [
+        "/src/data/languages.json",
+        "/src/data/version.json",
+        "/src/data/manifest.json"
+      ]
+    },
+    "static": {
+      "updateStrategy": "cache-first",
+      "files": [
+        "/src/js/lib/hanzi-writer.min.js",
+        "/src/js/lib/idb.js"
+      ]
+    }
+  }
 }
