@@ -7,7 +7,7 @@
 const SCOPE_PATH = self.location.pathname.replace(/\/[^/]*$/, '') || '';
 
 // 统一版本号：应用版本与缓存版本保持一致
-const APP_VERSION = '1.0.4';
+const APP_VERSION = '1.0.5';
 const CACHE_NAME = `chinese-vocab-${APP_VERSION}`;
 
 // 缓存列表（使用相对路径，自动适配部署路径）
@@ -75,7 +75,7 @@ self.addEventListener('activate', event => {
     );
 });
 
-// 拦截网络请求 - 纯Cache-First策略
+// 拦截网络请求 - 混合缓存策略
 self.addEventListener('fetch', event => {
     const url = new URL(event.request.url);
     
@@ -89,48 +89,83 @@ self.addEventListener('fetch', event => {
         return;
     }
     
-    // 使用纯Cache-First策略
+    // 数据库文件使用 NetworkFirst（确保数据最新）
+    if (url.pathname.includes('databasemain.json') || url.pathname.includes('version.json')) {
+        event.respondWith(networkFirstStrategy(event.request));
+        return;
+    }
+    
+    // 其他文件使用 CacheFirst（代码、CSS等静态资源）
     event.respondWith(cacheFirstStrategy(event.request));
 });
 
 /**
- * 纯Cache-First策略
- * 1. 优先检查缓存是否存在
- * 2. 如果缓存存在，直接返回缓存
- * 3. 如果缓存不存在，从网络获取
- * 4. 将网络响应缓存起来（如果成功）
- * 5. 如果网络也失败，返回离线兜底响应
+ * 纯Cache-First策略（适用于代码文件）
+ * 优先使用缓存，最大化离线可用性和加载速度
  */
 async function cacheFirstStrategy(request) {
     try {
-        // 1. 首先检查缓存
         const cachedResponse = await caches.match(request);
         
         if (cachedResponse) {
-            console.log('缓存命中:', request.url);
             return cachedResponse;
         }
         
-        console.log('缓存未命中，从网络获取:', request.url);
-        
-        // 2. 缓存不存在，从网络获取
         const networkResponse = await fetch(request);
         
-        // 3. 只有成功响应才缓存
         if (networkResponse && networkResponse.status === 200) {
             const responseToCache = networkResponse.clone();
             const cache = await caches.open(CACHE_NAME);
             cache.put(request, responseToCache);
-            console.log('已缓存:', request.url);
         }
         
         return networkResponse;
         
     } catch (error) {
-        console.error('获取失败:', request.url, error);
-        
-        // 4. 网络失败，返回离线兜底
         return new Response('离线 - 请检查网络连接', { 
+            status: 503,
+            statusText: 'Service Unavailable',
+            headers: new Headers({
+                'Content-Type': 'text/plain; charset=utf-8'
+            })
+        });
+    }
+}
+
+/**
+ * NetworkFirst策略（适用于数据库文件）
+ * 始终先检查网络，网络不好时用缓存
+ * 适合东南亚/拉美等网络不稳定地区
+ */
+async function networkFirstStrategy(request) {
+    try {
+        // 1. 先尝试网络请求
+        const networkResponse = await fetch(request);
+        
+        // 2. 网络成功，缓存并返回
+        if (networkResponse && networkResponse.status === 200) {
+            const responseToCache = networkResponse.clone();
+            const cache = await caches.open(CACHE_NAME);
+            cache.put(request, responseToCache);
+            console.log('网络获取成功，已缓存:', request.url);
+        }
+        
+        return networkResponse;
+        
+    } catch (error) {
+        console.log('网络请求失败，使用缓存:', request.url);
+        
+        // 3. 网络失败，使用缓存
+        const cachedResponse = await caches.match(request);
+        
+        if (cachedResponse) {
+            console.log('使用缓存数据:', request.url);
+            return cachedResponse;
+        }
+        
+        // 4. 连缓存都没有，返回离线提示
+        console.log('缓存也没有:', request.url);
+        return new Response('离线 - 无法加载数据', { 
             status: 503,
             statusText: 'Service Unavailable',
             headers: new Headers({
@@ -172,7 +207,7 @@ async function checkForUpdates() {
         const response = await fetch('./src/data/version.json');
         if (response.ok) {
             const versionInfo = await response.json();
-            const serverVersion = versionInfo.version || '1.0.4';
+            const serverVersion = versionInfo.version || '1.0.5';
             
             // 比较版本
             const currentVersion = APP_VERSION;
