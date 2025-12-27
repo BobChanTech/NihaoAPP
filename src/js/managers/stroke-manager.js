@@ -513,64 +513,26 @@ class StrokeManager {
                     const targetCharacter = charParam || targetChar;
                     console.log(`[StrokeManager] 加载字符数据: ${targetCharacter}`);
                     
-                    // 首先尝试从本地加载（使用相对路径）
-                    const localUrl = `./char-data/${targetCharacter}.json`;
-                    const fullLocalUrl = window.location.origin + localUrl;
-                    console.log(`尝试从本地加载汉字数据: ${fullLocalUrl}`);
+                    // 直接从CDN加载（已配置Service Worker缓存CDN响应）
+                    const cdnUrl = `https://cdn.jsdelivr.net/npm/hanzi-writer-data@2.0/zh/${targetCharacter}.json`;
+                    console.log(`从CDN加载汉字数据: ${cdnUrl}`);
                     
-                    try {
-                        const response = await fetch(localUrl);
-                        console.log(`本地请求状态: ${response.status}, ${response.statusText}`);
-                        
-                        if (response.ok) {
-                            const data = await response.json();
-                            console.log(`本地数据加载成功: ${targetCharacter}`);
-                            console.log(`数据内容:`, data);
-                            return data;
-                        } else {
-                            console.log(`本地数据加载失败，状态: ${response.status}, ${response.statusText}`);
-                            
-                            // 检查Response内容
-                            const errorText = await response.text();
-                            console.log(`错误响应内容:`, errorText);
-                        }
-                    } catch (error) {
-                        console.error(`本地fetch请求失败:`, error);
-                        console.log(`错误类型: ${error.name}`);
-                        console.log(`错误信息: ${error.message}`);
-                    }
+                    const response = await fetch(cdnUrl);
+                    console.log(`CDN请求状态: ${response.status}, ${response.statusText}`);
                     
-                    console.log(`尝试远程数据源`);
-                    
-                    // 如果本地加载失败，尝试使用远程数据源
-                    const remoteUrl = `https://cdn.jsdelivr.net/npm/hanzi-writer-data@2.0/zh/${targetCharacter}.json`;
-                    console.log(`尝试从远程加载汉字数据: ${remoteUrl}`);
-                    
-                    try {
-                        const remoteResponse = await fetch(remoteUrl);
-                        console.log(`远程请求状态: ${remoteResponse.status}, ${remoteResponse.statusText}`);
-                        
-                        if (remoteResponse.ok) {
-                            const remoteData = await remoteResponse.json();
-                            console.log(`远程数据加载成功: ${targetCharacter}`);
-                            console.log(`远程数据内容:`, remoteData);
-                            return remoteData;
-                        } else {
-                            console.log(`远程数据加载失败，状态: ${remoteResponse.status}, ${remoteResponse.statusText}`);
-                            
-                            // 检查Response内容
-                            const errorText = await remoteResponse.text();
-                            console.log(`远程错误响应内容:`, errorText);
-                            throw new Error(`无法加载汉字数据 (远程): ${remoteResponse.status} ${remoteResponse.statusText}`);
-                        }
-                    } catch (error) {
-                        console.error(`远程fetch请求失败:`, error);
-                        console.log(`错误类型: ${error.name}`);
-                        console.log(`错误信息: ${error.message}`);
-                        throw new Error(`无法加载汉字数据 (本地和远程都失败): ${targetCharacter} - ${error.message}`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        console.log(`CDN数据加载成功: ${targetCharacter}`);
+                        console.log(`数据内容:`, data);
+                        return data;
+                    } else {
+                        console.log(`CDN数据加载失败，状态: ${response.status}, ${response.statusText}`);
+                        const errorText = await response.text();
+                        console.log(`错误响应内容:`, errorText);
+                        throw new Error(`无法加载汉字数据: ${response.status} ${response.statusText}`);
                     }
                 } catch (error) {
-                    console.error(`加载汉字数据失败: ${targetCharacter}`, error);
+                    console.error(`加载汉字数据失败: ${targetChar}`, error);
                     throw error;
                 }
             };
