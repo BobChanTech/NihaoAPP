@@ -504,21 +504,69 @@ class StrokeManager {
         this.strokeDataCache = new Map();  // 存储已加载的文件数据
         this.loadedFiles = new Set();      // 记录已加载的文件编号
         this.strokesPath = './char-data/'; // 笔画数据路径（相对于HTML文件）
+        this.charIndex = null;             // 字符到文件编号的索引
+        this.indexLoaded = false;          // 索引是否已加载
+    }
+
+    /**
+     * 加载字符索引文件
+     * 索引文件包含每个字符到其所在文件编号的映射
+     */
+    async loadCharIndex() {
+        if (this.indexLoaded && this.charIndex) {
+            return this.charIndex;
+        }
+
+        const indexUrl = `${this.strokesPath}char-index.json`;
+
+        try {
+            console.log(`[StrokeManager] 加载字符索引文件: ${indexUrl}`);
+            const response = await fetch(indexUrl);
+
+            if (!response.ok) {
+                throw new Error(`HTTP错误: ${response.status} ${response.statusText}`);
+            }
+
+            this.charIndex = await response.json();
+            this.indexLoaded = true;
+            console.log(`[StrokeManager] 字符索引加载成功，包含 ${Object.keys(this.charIndex).length} 个字符的映射`);
+
+            return this.charIndex;
+        } catch (error) {
+            console.error(`[StrokeManager] 加载字符索引失败:`, error);
+            // 如果索引加载失败，使用哈希算法作为备用方案
+            return null;
+        }
     }
 
     /**
      * 根据字符获取对应的文件编号
-     * 将字符均匀分配到35个文件中
+     * 优先使用索引文件，否则使用哈希算法
      * @param {string} char - 中文字符
-     * @returns {number} 文件编号 (1-35)
+     * @returns {number} 文件编号 (1-30)
      */
-    getFileNumberForChar(char) {
-        // 获取字符的Unicode码点
+    async getFileNumberForChar(char) {
+        // 尝试从索引获取
+        if (this.indexLoaded && this.charIndex) {
+            const fileNumber = this.charIndex[char];
+            if (fileNumber) {
+                return fileNumber;
+            }
+        }
+
+        // 如果索引未加载，先尝试加载索引
+        if (!this.indexLoaded) {
+            await this.loadCharIndex();
+            if (this.charIndex && this.charIndex[char]) {
+                return this.charIndex[char];
+            }
+        }
+
+        // 使用哈希算法作为备用方案
+        console.log(`[StrokeManager] 字符「${char}」不在索引中，使用哈希算法`);
         const codePoint = char.codePointAt(0);
-        // 使用哈希算法将字符映射到1-35的文件编号
-        // 基于Unicode码点的分布，确保同一声旁或相似字符尽量分配到不同文件
         const hash = ((codePoint << 7) ^ (codePoint >> 3)) & 0x7FFFFFFF;
-        return (hash % 35) + 1;
+        return (hash % 30) + 1;
     }
 
     /**
@@ -565,7 +613,7 @@ class StrokeManager {
     async getCharData(char) {
         try {
             // 计算字符所在的文件编号
-            const fileNumber = this.getFileNumberForChar(char);
+            const fileNumber = await this.getFileNumberForChar(char);
             console.log(`[StrokeManager] 字符「${char}」位于文件 ${fileNumber}`);
 
             // 加载文件
@@ -644,9 +692,10 @@ class StrokeManager {
             // 使用闭包确保charDataLoader使用正确的字符
             const targetChar = char;
             const charDataLoader = async (charParam) => {
+                // 在外层声明targetCharacter，确保在catch块中可以访问
+                let targetCharacter = charParam || targetChar;
+                
                 try {
-                    // 使用传入的charParam而不是闭包中的char
-                    const targetCharacter = charParam || targetChar;
                     console.log(`[StrokeManager] 加载字符数据: ${targetCharacter}`);
                     
                     // 优先从本地合并文件加载
