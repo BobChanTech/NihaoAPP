@@ -10,6 +10,11 @@ class StrokeManager {
         this.multiCharWords = [];        // 多字词条的字符数组
         this.currentCharIndex = 0;       // 当前显示的字符索引
         
+        // 笔画数据缓存系统
+        this.strokeDataCache = new Map();    // 存储已加载的文件数据
+        this.loadedFiles = new Set();        // 记录已加载的文件编号
+        this.strokesPath = './char-data/';   // 笔画数据路径（相对于HTML文件）
+        
         // 绑定事件处理方法
         this._escapeKeyHandler = this._escapeKeyHandler.bind(this);
         this._keyDownHandler = this._keyDownHandler.bind(this);
@@ -492,6 +497,137 @@ class StrokeManager {
     }
 
     /**
+     * 初始化笔画数据缓存
+     * 用于存储已加载的合并文件数据
+     */
+    initStrokeDataCache() {
+        this.strokeDataCache = new Map();  // 存储已加载的文件数据
+        this.loadedFiles = new Set();      // 记录已加载的文件编号
+        this.strokesPath = './char-data/'; // 笔画数据路径（相对于HTML文件）
+    }
+
+    /**
+     * 根据字符获取对应的文件编号
+     * 将字符均匀分配到35个文件中
+     * @param {string} char - 中文字符
+     * @returns {number} 文件编号 (1-35)
+     */
+    getFileNumberForChar(char) {
+        // 获取字符的Unicode码点
+        const codePoint = char.codePointAt(0);
+        // 使用哈希算法将字符映射到1-35的文件编号
+        // 基于Unicode码点的分布，确保同一声旁或相似字符尽量分配到不同文件
+        const hash = ((codePoint << 7) ^ (codePoint >> 3)) & 0x7FFFFFFF;
+        return (hash % 35) + 1;
+    }
+
+    /**
+     * 加载指定文件的笔画数据
+     * @param {number} fileNumber - 文件编号 (1-35)
+     * @returns {Promise<Object>} 文件数据
+     */
+    async loadStrokeFile(fileNumber) {
+        // 如果文件已在缓存中，直接返回
+        if (this.strokeDataCache.has(fileNumber)) {
+            return this.strokeDataCache.get(fileNumber);
+        }
+
+        const fileName = `common-strokes-${String(fileNumber).padStart(2, '0')}.json`;
+        const fileUrl = `${this.strokesPath}${fileName}`;
+
+        try {
+            console.log(`[StrokeManager] 加载笔画数据文件: ${fileUrl}`);
+            const response = await fetch(fileUrl);
+
+            if (!response.ok) {
+                throw new Error(`HTTP错误: ${response.status} ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            console.log(`[StrokeManager] 文件 ${fileName} 加载成功，包含 ${Object.keys(data).length} 个字符`);
+
+            // 缓存数据
+            this.strokeDataCache.set(fileNumber, data);
+            this.loadedFiles.add(fileNumber);
+
+            return data;
+        } catch (error) {
+            console.error(`[StrokeManager] 加载文件 ${fileName} 失败:`, error);
+            throw error;
+        }
+    }
+
+    /**
+     * 从合并文件中获取指定字符的笔画数据
+     * @param {string} char - 中文字符
+     * @returns {Promise<Object|null>} 字符的笔画数据，如果未找到则返回null
+     */
+    async getCharData(char) {
+        try {
+            // 计算字符所在的文件编号
+            const fileNumber = this.getFileNumberForChar(char);
+            console.log(`[StrokeManager] 字符「${char}」位于文件 ${fileNumber}`);
+
+            // 加载文件
+            const fileData = await this.loadStrokeFile(fileNumber);
+
+            // 从字典中获取字符数据
+            const charData = fileData[char];
+
+            if (charData) {
+                console.log(`[StrokeManager] 找到字符「${char}」的笔画数据`);
+                // 返回HanziWriter需要的数据格式
+                return {
+                    strokes: charData.strokes,
+                    medians: charData.medians
+                };
+            } else {
+                console.log(`[StrokeManager] 字符「${char}」在文件 ${fileNumber} 中未找到`);
+                return null;
+            }
+        } catch (error) {
+            console.error(`[StrokeManager] 获取字符「${char}」数据失败:`, error);
+            return null;
+        }
+    }
+
+    /**
+     * 预加载指定文件的笔画数据（用于预缓存）
+     * @param {number} fileNumber - 文件编号 (1-35)
+     */
+    async preloadStrokeFile(fileNumber) {
+        if (!this.loadedFiles.has(fileNumber)) {
+            try {
+                await this.loadStrokeFile(fileNumber);
+                console.log(`[StrokeManager] 预加载文件 ${fileNumber} 成功`);
+            } catch (error) {
+                console.warn(`[StrokeManager] 预加载文件 ${fileNumber} 失败:`, error.message);
+            }
+        }
+    }
+
+    /**
+     * 清空笔画数据缓存
+     */
+    clearStrokeDataCache() {
+        this.strokeDataCache.clear();
+        this.loadedFiles.clear();
+        console.log('[StrokeManager] 笔画数据缓存已清空');
+    }
+
+    /**
+     * 获取缓存状态
+     * @returns {Object} 缓存状态信息
+     */
+    getCacheStatus() {
+        return {
+            loadedFiles: Array.from(this.loadedFiles),
+            cacheSize: this.strokeDataCache.size,
+            memoryUsage: `${(this.strokeDataCache.size * 300).toFixed(2)} KB (估算)`
+        };
+    }
+
+    /**
      * 创建HanziWriter实例（共享方法）
      */
     async createHanziWriterInstance(container, char) {
@@ -513,64 +649,46 @@ class StrokeManager {
                     const targetCharacter = charParam || targetChar;
                     console.log(`[StrokeManager] 加载字符数据: ${targetCharacter}`);
                     
-                    // 首先尝试从本地加载（使用相对路径）
-                    const localUrl = `./char-data/${targetCharacter}.json`;
-                    const fullLocalUrl = window.location.origin + localUrl;
-                    console.log(`尝试从本地加载汉字数据: ${fullLocalUrl}`);
+                    // 优先从本地合并文件加载
+                    const localCharData = await this.getCharData(targetCharacter);
                     
-                    try {
-                        const response = await fetch(localUrl);
-                        console.log(`本地请求状态: ${response.status}, ${response.statusText}`);
-                        
-                        if (response.ok) {
-                            const data = await response.json();
-                            console.log(`本地数据加载成功: ${targetCharacter}`);
-                            console.log(`数据内容:`, data);
-                            return data;
-                        } else {
-                            console.log(`本地数据加载失败，状态: ${response.status}, ${response.statusText}`);
-                            
-                            // 检查Response内容
-                            const errorText = await response.text();
-                            console.log(`错误响应内容:`, errorText);
-                        }
-                    } catch (error) {
-                        console.error(`本地fetch请求失败:`, error);
-                        console.log(`错误类型: ${error.name}`);
-                        console.log(`错误信息: ${error.message}`);
+                    if (localCharData) {
+                        console.log(`[StrokeManager] 本地合并文件数据加载成功: ${targetCharacter}`);
+                        console.log(`[StrokeManager] 数据内容:`, localCharData);
+                        return localCharData;
                     }
                     
-                    console.log(`尝试远程数据源`);
+                    console.log(`[StrokeManager] 本地数据未找到，尝试远程数据源`);
                     
                     // 如果本地加载失败，尝试使用远程数据源
                     const remoteUrl = `https://cdn.jsdelivr.net/npm/hanzi-writer-data@2.0/zh/${targetCharacter}.json`;
-                    console.log(`尝试从远程加载汉字数据: ${remoteUrl}`);
+                    console.log(`[StrokeManager] 尝试从远程加载汉字数据: ${remoteUrl}`);
                     
                     try {
                         const remoteResponse = await fetch(remoteUrl);
-                        console.log(`远程请求状态: ${remoteResponse.status}, ${remoteResponse.statusText}`);
+                        console.log(`[StrokeManager] 远程请求状态: ${remoteResponse.status}, ${remoteResponse.statusText}`);
                         
                         if (remoteResponse.ok) {
                             const remoteData = await remoteResponse.json();
-                            console.log(`远程数据加载成功: ${targetCharacter}`);
-                            console.log(`远程数据内容:`, remoteData);
+                            console.log(`[StrokeManager] 远程数据加载成功: ${targetCharacter}`);
+                            console.log(`[StrokeManager] 远程数据内容:`, remoteData);
                             return remoteData;
                         } else {
-                            console.log(`远程数据加载失败，状态: ${remoteResponse.status}, ${remoteResponse.statusText}`);
+                            console.log(`[StrokeManager] 远程数据加载失败，状态: ${remoteResponse.status}`);
                             
                             // 检查Response内容
                             const errorText = await remoteResponse.text();
-                            console.log(`远程错误响应内容:`, errorText);
+                            console.log(`[StrokeManager] 远程错误响应内容:`, errorText);
                             throw new Error(`无法加载汉字数据 (远程): ${remoteResponse.status} ${remoteResponse.statusText}`);
                         }
                     } catch (error) {
-                        console.error(`远程fetch请求失败:`, error);
-                        console.log(`错误类型: ${error.name}`);
-                        console.log(`错误信息: ${error.message}`);
+                        console.error(`[StrokeManager] 远程fetch请求失败:`, error);
+                        console.log(`[StrokeManager] 错误类型: ${error.name}`);
+                        console.log(`[StrokeManager] 错误信息: ${error.message}`);
                         throw new Error(`无法加载汉字数据 (本地和远程都失败): ${targetCharacter} - ${error.message}`);
                     }
                 } catch (error) {
-                    console.error(`加载汉字数据失败: ${targetCharacter}`, error);
+                    console.error(`[StrokeManager] 加载汉字数据失败: ${targetCharacter}`, error);
                     throw error;
                 }
             };
