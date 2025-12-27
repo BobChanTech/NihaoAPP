@@ -210,7 +210,6 @@ class SimpleReferralManager {
         
         // 复制码和分享功能
         copyShareButton.addEventListener('click', async () => {
-            // 复制到剪贴板
             try {
                 await navigator.clipboard.writeText(shareText);
                 // 显示成功消息
@@ -231,47 +230,13 @@ class SimpleReferralManager {
                 `;
                 document.body.appendChild(successMsg);
                 
-                this.incrementShareCount();
-                
-                // 尝试调用原生分享API（如果在支持的环境）
-                if (navigator.share) {
-                    try {
-                        const referralCode = this.getUserReferralCode();
-                        const referralLink = this.generateReferralLink();
-                        const userLanguage = localStorage.getItem('userLanguage') || 'vi';
-                        
-                        // 准备分享数据
-                        const shareData = {
-                            title: userLanguage === 'default' ? '一起学中文！' : 'Học tiếng Trung cùng tôi!',
-                            text: shareText,
-                            url: referralLink
-                        };
-                        
-                        // 检查是否支持分享
-                        if (navigator.canShare && navigator.canShare(shareData)) {
-                            await navigator.share(shareData);
-                            // 用户完成分享后关闭模态框
-                            setTimeout(() => {
-                                document.body.removeChild(successMsg);
-                                document.body.removeChild(modal);
-                            }, 500);
-                            return;
-                        }
-                    } catch (shareErr) {
-                        // 用户取消分享或其他错误，继续显示成功消息
-                        if (shareErr.name !== 'AbortError') {
-                            console.log('原生分享失败:', shareErr.message);
-                        }
-                    }
-                }
-                
-                // 2秒后关闭
                 setTimeout(() => {
                     document.body.removeChild(successMsg);
                     document.body.removeChild(modal);
                 }, 2000);
+                
+                this.incrementShareCount();
             } catch (err) {
-                // 备用复制方法
                 const textArea = document.createElement('textarea');
                 textArea.value = shareText;
                 document.body.appendChild(textArea);
@@ -588,8 +553,7 @@ class ShareManager {
                 cancel: '❌ Hủy',
                 shareSuccess: '✅ Chia sẻ thành công!',
                 shareFailed: '❌ Chia sẻ thất bại',
-                longPressTip: '💡 Mẹo: Nhấn giữ ảnh để lưu vào thư viện',
-                share: '📤 Chia sẻ'
+                longPressTip: '💡 Mẹo: Nhấn giữ ảnh để lưu vào thư viện'
             },
             'id': {
                 shareOptionsTitle: '📤 Pilih cara berbagi',
@@ -598,8 +562,7 @@ class ShareManager {
                 cancel: '❌ Batal',
                 shareSuccess: '✅ Berhasil dibagikan!',
                 shareFailed: '❌ Gagal dibagikan',
-                longPressTip: '💡 Tips: Tekan lama gambar untuk menyimpan ke galeri',
-                share: '📤 Bagikan'
+                longPressTip: '💡 Tips: Tekan lama gambar untuk menyimpan ke galeri'
             },
             'es': {
                 shareOptionsTitle: '📤 Elige cómo compartir',
@@ -608,8 +571,7 @@ class ShareManager {
                 cancel: '❌ Cancelar',
                 shareSuccess: '¡✅ Compartido con éxito!',
                 shareFailed: '❌ Error al compartir',
-                longPressTip: '💡 Consejo: Mantén presionada la imagen para guardar en la galería',
-                share: '📤 Compartir'
+                longPressTip: '💡 Consejo: Mantén presionada la imagen para guardar en la galería'
             },
             'de': {
                 shareOptionsTitle: '📤 Wählen Sie, wie Sie teilen möchten',
@@ -618,8 +580,7 @@ class ShareManager {
                 cancel: '❌ Abbrechen',
                 shareSuccess: '✅ Erfolgreich geteilt!',
                 shareFailed: '❌ Teilen fehlgeschlagen',
-                longPressTip: '💡 Tipp: Bild lange drücken, um es in der Galerie zu speichern',
-                share: '📤 Teilen'
+                longPressTip: '💡 Tipp: Bild lange drücken, um es in der Galerie zu speichern'
             },
             'fr': {
                 shareOptionsTitle: '📤 Choisissez comment partager',
@@ -628,8 +589,7 @@ class ShareManager {
                 cancel: '❌ Annuler',
                 shareSuccess: '✅ Partagé avec succès !',
                 shareFailed: '❌ Échec du partage',
-                longPressTip: '💡 Astuce : Maintenez l\'image appuyée pour l\'enregistrer dans la galerie',
-                share: '📤 Partager'
+                longPressTip: '💡 Astuce : Maintenez l\'image appuyée pour l\'enregistrer dans la galerie'
             },
             'ru': {
                 shareOptionsTitle: '📤 Выберите способ поделиться',
@@ -638,8 +598,7 @@ class ShareManager {
                 cancel: '❌ Отмена',
                 shareSuccess: '✅ Успешно поделились!',
                 shareFailed: '❌ Ошибка при поделиться',
-                longPressTip: '💡 Совет: Нажмите и удерживайте изображение, чтобы сохранить в галерею',
-                share: '📤 Поделиться'
+                longPressTip: '💡 Совет: Нажмите и удерживайте изображение, чтобы сохранить в галерею'
             },
             'ko': {
                 shareOptionsTitle: '📤 공유 방법 선택',
@@ -648,8 +607,7 @@ class ShareManager {
                 cancel: '❌ 취소',
                 shareSuccess: '✅ 성공적으로 공유되었습니다!',
                 shareFailed: '❌ 공유 실패',
-                longPressTip: '💡 팁: 이미지를 길게 눌러 갤러리에 저장하세요',
-                share: '📤 공유'
+                longPressTip: '💡 팁: 이미지를 길게 눌러 갤러리에 저장하세요'
             },
             'hi': {
                 shareOptionsTitle: '📤 साझा करने का तरीका चुनें',
@@ -658,8 +616,7 @@ class ShareManager {
                 cancel: '❌ रद्द करें',
                 shareSuccess: '✅ सफलतापूर्वक साझा किया गया!',
                 shareFailed: '❌ साझा करने में त्रुटि',
-                longPressTip: '💡 सुझाव: गैलरी में सहेजने के लिए छवि को देर तक दबाए रखें',
-                share: '📤 साझा करें'
+                longPressTip: '💡 सुझाव: गैलरी में सहेजने के लिए छवि को देर तक दबाए रखें'
             },
             'th': {
                 shareOptionsTitle: '📤 เลือกวิธีแชร์',
@@ -668,8 +625,7 @@ class ShareManager {
                 cancel: '❌ ยกเลิก',
                 shareSuccess: '✅ แชร์สำเร็จ!',
                 shareFailed: '❌ แชร์ไม่สำเร็จ',
-                longPressTip: '💡 เคล็ดลับ: กดค้างรูปภาพเพื่อบันทึกลงในแกลเลอรี',
-                share: '📤 แชร์'
+                longPressTip: '💡 เคล็ดลับ: กดค้างรูปภาพเพื่อบันทึกลงในแกลเลอรี'
             },
             'my': {
                 shareOptionsTitle: '📤 Pilih cara berkongsi',
@@ -678,8 +634,7 @@ class ShareManager {
                 cancel: '❌ Batal',
                 shareSuccess: '✅ Berjaya dikongsi!',
                 shareFailed: '❌ Gagal dikongsi',
-                longPressTip: '💡 Tips: Tekan lama gambar untuk simpan dalam galeri',
-                share: '📤 Kongsi'
+                longPressTip: '💡 Tips: Tekan lama gambar untuk simpan dalam galeri'
             },
             'km': {
                 shareOptionsTitle: '📤 ជ្រើសរើសរបៀបចែករំលែក',
@@ -688,8 +643,7 @@ class ShareManager {
                 cancel: '❌ បោះបង់',
                 shareSuccess: '✅ ចែករំលែកបានជោគជ័យ!',
                 shareFailed: '❌ ចែករំលែកបានបរាជ័យ',
-                longPressTip: '💡 គន្លឹះ: ចុចរូបភាពឲ្យយូរដើម្បីរក្សាទុកក្នុងវិចិត្រសារ',
-                share: '📤 ចែករំលែក'
+                longPressTip: '💡 គន្លឹះ: ចុចរូបភាពឲ្យយូរដើម្បីរក្សាទុកក្នុងវិចិត្រសារ'
             },
             'lo': {
                 shareOptionsTitle: '📤 ເລືỈອງເລືỈອງການແບ່ງປັບ',
@@ -725,8 +679,7 @@ class ShareManager {
                 cancel: '❌ 取消',
                 shareSuccess: '✅ 分享成功！',
                 shareFailed: '❌ 分享失败',
-                longPressTip: '💡 提示：长按图片可保存到相册',
-                share: '📤 转发'
+                longPressTip: '💡 提示：长按图片可保存到相册'
             }
         };
         
@@ -1103,7 +1056,7 @@ class ShareManager {
         
         // 创建关闭按钮
         const closeButton = document.createElement('button');
-        closeButton.textContent = texts.share || '转发';
+        closeButton.textContent = texts.close || '关闭';
         closeButton.style.cssText = `
             padding: 10px 30px;
             font-size: 16px;
