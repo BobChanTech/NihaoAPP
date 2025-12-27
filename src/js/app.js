@@ -17,7 +17,7 @@ class ChineseVocabApp {
         this.currentWords = [];
         this.currentAudio = null;
         this.isDataLoaded = false;
-        this.dataVersion = '1.0.4';
+        this.dataVersion = '1.0.5';
         this.lastUpdateTime = null;
         this.userLanguage = localStorage.getItem('userLanguage') || 'vi';
         this.currentIndex = 0;
