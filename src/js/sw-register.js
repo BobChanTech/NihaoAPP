@@ -1,5 +1,6 @@
 // Service Worker 注册器 - 静默升级版
 // 功能：后台静默注册和更新，无需用户确认
+// 注意：版本检查只在首次加载时执行，避免反复刷新
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('sw.js')
@@ -39,7 +40,7 @@ if ('serviceWorker' in navigator) {
                 }
             });
 
-            // 发送初始版本检查请求
+            // 发送初始版本检查请求（只在首次加载时检查）
             if (registration.active) {
                 registration.active.postMessage({ type: 'CHECK_UPDATE' });
             }
@@ -107,17 +108,3 @@ async function performSilentUpdate(registration) {
         }, 2000);
     }
 }
-
-// 页面可见性变化时检查更新（后台静默进行）
-document.addEventListener('visibilitychange', () => {
-    if (!document.hidden && navigator.serviceWorker.controller) {
-        navigator.serviceWorker.controller.postMessage({ type: 'CHECK_UPDATE' });
-    }
-});
-
-// 页面卸载前重置更新标志
-window.addEventListener('beforeunload', () => {
-    if (navigator.serviceWorker.controller) {
-        navigator.serviceWorker.controller.postMessage({ type: 'RESET_UPDATE_FLAG' });
-    }
-});
